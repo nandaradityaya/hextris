@@ -1,52 +1,35 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKER_IMAGE = "nandaradityaya/web-hextris-image"
-        NAMESPACE = "exam"
-    }
-
     stages {
-
         stage('Pull SCM') {
             steps {
-                echo "Pulling source code..."
-                checkout scm
+                git branch: 'gh-pages', url: 'https://github.com/nandaradityaya/hextris.git'
             }
         }
-
-        stage('Build Docker Image') {
+        
+        stage('Containerized Apps') {
             steps {
-                echo "Building Docker image..."
-                sh "docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} ."
+                sh'''
+                docker build -t nandaradityaya/web-hextris-image:latest .
+                '''
             }
         }
 
-
-        stage('Push Docker Image') {
+        stage('Push to Registry') {
             steps {
-                sh """
-                    docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}
-                    docker tag ${DOCKER_IMAGE}:${BUILD_NUMBER} ${DOCKER_IMAGE}:latest
-                    docker push ${DOCKER_IMAGE}:latest
-                """
+                sh'''
+                docker push nandaradityaya/web-hextris-image:latest
+                '''
             }
         }
 
-        stage('Deploy to Kubernetes') {
+        stage('Deploy Apps') {
             steps {
-                    sh """
-                        export KUBECONFIG=${KUBECONFIG_FILE}
-                        kubectl -n ${NAMESPACE} apply -f deployment.yaml
-                        kubectl -n ${NAMESPACE} rollout restart deployment hextris-app
-                    """
+                sh'''
+                kubectl apply -f manifest/
+                '''
             }
-        }
-    }
-
-    post {
-        always {
-            echo "Cleaning up workspace..."
-        }
+        }   
     }
 }
