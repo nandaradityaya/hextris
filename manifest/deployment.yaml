@@ -44,7 +44,7 @@ spec:
   selector:
     app: web-hextris
   ports:
-  - port: 80
+  - port: 8080
     targetPort: 8080
   type: ClusterIP
 ---
@@ -85,4 +85,4 @@ spec:
     - destination:
         host: web-hextris-service
         port:
-          number: 80
+          number: 8080
