@@ -30,7 +30,7 @@ spec:
       - name: web-hextris
         image: nandaradityaya/web-hextris-image
         ports:
-        - containerPort: 8080
+        - containerPort: 80
 ---
 # =======================
 # Service
@@ -44,8 +44,8 @@ spec:
   selector:
     app: web-hextris
   ports:
-  - port: 8080
-    targetPort: 8080
+  - port: 80
+    targetPort: 80
   type: ClusterIP
 ---
 # =======================
@@ -61,7 +61,7 @@ spec:
     istio: ingressgateway
   servers:
   - port:
-      number: 8080
+      number: 80
       name: http
       protocol: HTTP
     hosts:
@@ -85,4 +85,4 @@ spec:
     - destination:
         host: web-hextris-service
         port:
-          number: 8080
+          number: 80
