@@ -35,14 +35,11 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                {
-
                     sh """
                         export KUBECONFIG=${KUBECONFIG_FILE}
                         kubectl -n ${NAMESPACE} apply -f deployment.yaml
                         kubectl -n ${NAMESPACE} rollout restart deployment hextris-app
                     """
-                }
             }
         }
     }
