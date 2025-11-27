@@ -1,0 +1,88 @@
+# =======================
+# Namespace
+# =======================
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: exam
+---
+# =======================
+# Deployment
+# =======================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-hextris
+  namespace: exam
+  labels:
+    app: web-hextris
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: web-hextris
+  template:
+    metadata:
+      labels:
+        app: web-hextris
+    spec:
+      containers:
+      - name: web-hextris
+        image: nandaradityaya/web-hextris-image
+        ports:
+        - containerPort: 80
+---
+# =======================
+# Service
+# =======================
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-hextris-service
+  namespace: exam
+spec:
+  selector:
+    app: web-hextris
+  ports:
+  - port: 80
+    targetPort: 80
+  type: ClusterIP
+---
+# =======================
+# Istio Gateway
+# =======================
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: web-hextris-gateway
+  namespace: exam
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+---
+# =======================
+# Istio VirtualService
+# =======================
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: web-hextris-vs
+  namespace: exam
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - web-hextris-gateway
+  http:
+  - route:
+    - destination:
+        host: web-hextris-service
+        port:
+          number: 80
